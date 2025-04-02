@@ -22,6 +22,22 @@ jobs:
       run: |
         python -m pip install --upgrade pip
         pip install -r requirements.txt
+        pip list  # Debug installed packages
+        
+    - name: Verify environment variables
+      run: |
+        if [ -z "$APP_ID" ]; then echo "APP_ID is missing"; exit 1; fi
+        if [ -z "$ISSUER_ID" ]; then echo "ASC_ISSUER_ID is missing"; exit 1; fi
+        if [ -z "$KEY_ID" ]; then echo "ASC_KEY_ID is missing"; exit 1; fi
+        if [ -z "$PRIVATE_KEY" ]; then echo "ASC_KEY_CONTENT is missing"; exit 1; fi
+        if [ -z "$SLACK_WEBHOOK_URL" ]; then echo "SLACK_WEBHOOK_URL is missing"; exit 1; fi
+        echo "All required environment variables are set"
+      env:
+        APP_ID: ${{ secrets.APP_ID }}
+        ISSUER_ID: ${{ secrets.ASC_ISSUER_ID }}
+        KEY_ID: ${{ secrets.ASC_KEY_ID }}
+        PRIVATE_KEY: ${{ secrets.ASC_KEY_CONTENT }}
+        SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
         
     - name: Run App Review Monitor
       env:
@@ -31,4 +47,6 @@ jobs:
         PRIVATE_KEY: ${{ secrets.ASC_KEY_CONTENT }}
         SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
       run: |
-        python -m app_review_monitor.cli --days 30 
+        echo "Starting app review monitor..."
+        python -m app_review_monitor.cli --days 30 --debug
+      continue-on-error: true 
