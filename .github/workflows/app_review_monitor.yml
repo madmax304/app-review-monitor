@@ -32,6 +32,11 @@ jobs:
         if [ -z "$PRIVATE_KEY" ]; then echo "ASC_KEY_CONTENT is missing"; exit 1; fi
         if [ -z "$SLACK_WEBHOOK_URL" ]; then echo "SLACK_WEBHOOK_URL is missing"; exit 1; fi
         echo "All required environment variables are set"
+        echo "APP_ID length: ${#APP_ID}"
+        echo "ISSUER_ID length: ${#ISSUER_ID}"
+        echo "KEY_ID length: ${#KEY_ID}"
+        echo "PRIVATE_KEY length: ${#PRIVATE_KEY}"
+        echo "SLACK_WEBHOOK_URL length: ${#SLACK_WEBHOOK_URL}"
       env:
         APP_ID: ${{ secrets.APP_ID }}
         ISSUER_ID: ${{ secrets.ASC_ISSUER_ID }}
@@ -41,9 +46,14 @@ jobs:
 
     - name: Format private key
       run: |
+        echo "Formatting private key..."
         echo "-----BEGIN PRIVATE KEY-----" > private_key.pem
         echo "$PRIVATE_KEY" | fold -w 64 >> private_key.pem
         echo "-----END PRIVATE KEY-----" >> private_key.pem
+        echo "Private key file contents (first line only):"
+        head -n 1 private_key.pem
+        echo "Private key file size:"
+        wc -l private_key.pem
       env:
         PRIVATE_KEY: ${{ secrets.ASC_KEY_CONTENT }}
         
@@ -54,7 +64,10 @@ jobs:
         KEY_ID: ${{ secrets.ASC_KEY_ID }}
         PRIVATE_KEY: $(cat private_key.pem)
         SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+        PYTHONVERBOSE: "1"
       run: |
         echo "Starting app review monitor..."
-        python -m app_review_monitor.cli --days 30 --debug
+        echo "Current directory: $(pwd)"
+        echo "Python path: $PYTHONPATH"
+        python -m app_review_monitor.cli --days 30 --debug --verbose
       continue-on-error: true 
