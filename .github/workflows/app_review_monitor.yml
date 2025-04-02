@@ -38,13 +38,21 @@ jobs:
         KEY_ID: ${{ secrets.ASC_KEY_ID }}
         PRIVATE_KEY: ${{ secrets.ASC_KEY_CONTENT }}
         SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+
+    - name: Format private key
+      run: |
+        echo "-----BEGIN PRIVATE KEY-----" > private_key.pem
+        echo "$PRIVATE_KEY" | fold -w 64 >> private_key.pem
+        echo "-----END PRIVATE KEY-----" >> private_key.pem
+      env:
+        PRIVATE_KEY: ${{ secrets.ASC_KEY_CONTENT }}
         
     - name: Run App Review Monitor
       env:
         APP_ID: ${{ secrets.APP_ID }}
         ISSUER_ID: ${{ secrets.ASC_ISSUER_ID }}
         KEY_ID: ${{ secrets.ASC_KEY_ID }}
-        PRIVATE_KEY: ${{ secrets.ASC_KEY_CONTENT }}
+        PRIVATE_KEY: $(cat private_key.pem)
         SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
       run: |
         echo "Starting app review monitor..."
