@@ -68,7 +68,7 @@ jobs:
         APP_ID: ${{ secrets.APP_ID }}
         ISSUER_ID: ${{ secrets.ASC_ISSUER_ID }}
         KEY_ID: ${{ secrets.ASC_KEY_ID }}
-        PRIVATE_KEY_PATH: ~/.appstoreconnect/private_keys/AuthKey.p8
+        PRIVATE_KEY: $(cat ~/.appstoreconnect/private_keys/AuthKey.p8)
         SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
         PYTHONVERBOSE: "1"
         DEBUG: "1"
